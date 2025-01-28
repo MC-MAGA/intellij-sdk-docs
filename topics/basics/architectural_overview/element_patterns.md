@@ -29,7 +29,7 @@ Instead, we recommend using the high-level pattern classes provided by the Intel
 Some built-in languages in the IntelliJ Platform implement their own pattern classes and can provide additional examples:
 
 - [`XmlPatterns`](%gh-ic%/xml/xml-psi-api/src/com/intellij/patterns/XmlPatterns.java) provides patterns for XML attributes, values, entities, and texts.
-- [`PythonPatterns`](%gh-ic%/python/src/com/jetbrains/python/patterns/PythonPatterns.java) provides patterns for literals, strings, arguments, and function/method arguments for Python.
+- [`PsiJavaPatterns`](%gh-ic%/java/java-psi-api/src/com/intellij/patterns/PsiJavaPatterns.java) provides patterns for literals, strings, arguments, and function/method arguments for Java.
 - [`DomPatterns`](%gh-ic%/xml/dom-openapi/src/com/intellij/patterns/DomPatterns.java) builds upon `XmlPatterns` and acts as a wrapper to provide further patterns for [DOM-API](xml_dom_api.md).
 
 ## Examples
@@ -72,7 +72,7 @@ This last example shows that corner cases need to be considered carefully even f
 ## Tools and Debugging
 
 Working with element patterns can be tricky, and plugin authors need a solid understanding of the underlying PSI structure to get it right.
-Therefore, it is recommended to use the [PsiViewer plugin or built-in PSI viewer](explore_api.md#31-use-internal-mode-and-psiviewer) and verify that elements indeed have the expected structure and properties.
+Therefore, it is recommended to use the [PsiViewer plugin or built-in PSI viewer](explore_api.md#internalMode) and verify that elements indeed have the expected structure and properties.
 
 ### Debugging
 

@@ -1,4 +1,4 @@
-<!-- Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license. -->
+<!-- Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license. -->
 
 # Explore the IntelliJ Platform API
 
@@ -16,7 +16,8 @@ This usually happens in two situations:
 This guide provides a list of proven strategies that can help you overcome these challenges and gather enough information to continue your work.
 Furthermore, the tips below will help build your confidence as you explore the IntelliJ Platform.
 
-> In some cases, implementing an actual IntelliJ Platform plugin might not be necessary, as [alternative solutions](plugin_alternatives.md) exist.
+<include from="intellij_platform.md" element-id="pluginAlternatives"/>
+
 > See also [](plugin_required_experience.md) about necessary technology knowledge.
 
 ## 1 Extension Points (EPs)
@@ -24,11 +25,11 @@ Furthermore, the tips below will help build your confidence as you explore the I
 ### 1.1 Browse Lists of EPs
 
 The most important resource for discovering new EPs is the extensive list provided directly in the
-[IntelliJ Platform SDK Documentation](extension_point_list.md).
+[IntelliJ Platform SDK Documentation](intellij_platform_extension_point_list.md).
 On this page, you will find all the EPs, and each entry includes a link to the online source code and a link to the
 [IntelliJ Platform Explorer](https://jb.gg/ipe),
 which helps you find examples of this EP in other plugins.
-Additionally, dedicated Extension Point Lists specific to IDEs are available under _Part VIII — Product Specific_.
+Additionally, dedicated Extension Point Lists specific to IDEs are available under _Product Specific_.
 
 ### 1.2 Use Autocompletion Information
 
@@ -89,10 +90,10 @@ source code, as well as other basic features of IntelliJ IDEA.
 
 Many developers keep the
 [IntelliJ Community source code](https://github.com/JetBrains/intellij-community)
-open in a separate window while working on their plugin.
-Others simply search the source code of the IntelliJ Platform that is attached by default when using a [Gradle IntelliJ Plugin](tools_gradle_intellij_plugin.md)-based project.
+open in a separate IDE project while working on their plugin.
+Others search the source code of the IntelliJ Platform that is attached by default when using a [Gradle](creating_plugin_project.md)-based project.
 While both methods work, it should be noted that developing plugins without inspecting the IntelliJ Platform code is nearly impossible,
-and all the tips below assume that you have the source code available.
+and all the tips below assume having the sources available.
 
 ### 2.1 Find Example Implementations
 
@@ -144,18 +145,19 @@ If you want to implement a functionality that is similar to an existing IDE feat
 
 ### 2.6 Refrain from Using Internal Classes
 
-As a general remark, the use of implementation classes is strongly discouraged (i.e. classes ending with `Impl` in their name,
+As a general remark, the use of implementation classes is strongly discouraged (i.e., classes ending with `Impl` in their name,
 located under `impl` package, or included in <path>*-impl.jar</path>).
 
-Also, API annotated with
-[`org.jetbrains.annotations.ApiStatus.Internal`](https://github.com/JetBrains/java-annotations/blob/master/common/src/main/java/org/jetbrains/annotations/ApiStatus.java)
+API annotated with
+[`@ApiStatus.Internal`](%gh-java-annotations%/common/src/main/java/org/jetbrains/annotations/ApiStatus.java)
 must not be used, see [](api_internal.md) for more details and replacements.
 
 ## 3 Tools and References
 
 ### 3.1 Use Internal Mode and PsiViewer
+{id="internalMode"}
 
-As a plugin developer, you should enable the [internal mode](enabling_internal.md) in IntelliJ IDEA.
+When developing plugins, always enable the [internal mode](enabling_internal.md) in IntelliJ IDEA.
 This provides access to a suite of tools to help you develop, debug, and test IntelliJ Platform plugins.
 
 One of its most helpful features is the [UI Inspector](internal_ui_inspector.md),
@@ -182,7 +184,7 @@ Here is a condensed list you can use for further reference:
 
 - [](useful_links.md)
 - [](learning_resources.md)
-- [](extension_point_list.md)
+- [](intellij_platform_extension_point_list.md)
 - Section on [exploring module and plugin APIs](plugin_compatibility.md#exploring-module-and-plugin-apis).
 - List of [notable](api_notable.md) and [incompatible](api_changes_list.md) API changes.
 

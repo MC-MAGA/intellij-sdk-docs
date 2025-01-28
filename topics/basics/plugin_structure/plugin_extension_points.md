@@ -1,4 +1,4 @@
-<!-- Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license. -->
+<!-- Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license. -->
 
 # Extension Points
 
@@ -12,51 +12,31 @@ By defining _extension points_ in your plugin, you can allow other plugins to ex
 There are two types of extension points:
 
 * _Interface_ extension points allow other plugins to extend your plugins with _code_.
-  When you define an interface extension point, you specify an interface, and other plugins will provide classes implementing that interface.
-  You'll then be able to invoke methods on those interfaces.
-* _Bean_ extension points allow other plugins to extend your plugins with _data_.
-  You specify the fully qualified name of an extension class, and other plugins will provide data that will be turned into instances of that class.
+  When defining an interface extension point, specify an interface, and other plugins will provide classes implementing that interface.
+  The providing plugin can then invoke methods on this interface.
+  In most cases, the interface can be annotated with `@ApiStatus.OverrideOnly` (see [](verifying_plugin_compatibility.md#override-only-api)).
+* _Bean_ extension points allow other plugins to extend a plugin with _data_.
+  Specify the fully qualified name of an extension class, and other plugins will provide data that will be turned into instances of that class.
 
-## Declaring Extension Points
+<procedure title="Declaring Extension Point" id="declaring-extension-points">
 
-You can declare extensions and extension points in the plugin configuration file <path>[plugin.xml](plugin_configuration_file.md)</path>, within the [`<extensions>`](plugin_configuration_file.md#idea-plugin__extensions) and [`<extensionPoints>`](plugin_configuration_file.md#idea-plugin__extensionPoints) sections.
+1. Add an [`<extensionPoints>`](plugin_configuration_file.md#idea-plugin__extensionPoints) section to <path>plugin.xml</path>, if it's not yet present there.
+2. Add a child element [`<extensionPoint>`](plugin_configuration_file.md#idea-plugin__extensionPoints__extensionPoint).
+3. Specify the extension point name with the `name` or `qualifiedName` attribute __*__.
+4. Depending on the extension point type, specify the `interface` or `beanClass` attribute __*__.
+5. If required, specify the `area` attribute __*__.
 
-To declare extension points in your plugin, add an `<extensionPoints>` section to your <path>plugin.xml</path>.
-Then insert a child element [`<extensionPoint>`](plugin_configuration_file.md#idea-plugin__extensionPoints__extensionPoint) that defines the extension point name and the name of a bean class or an interface that is allowed to extend the plugin functionality in the `name`, `beanClass` and `interface` attributes, respectively.
+See the [](#example).
 
-<path>myPlugin/META-INF/plugin.xml</path>
+__*__ _see the **Attributes** section for [`<extensionPoint>`](plugin_configuration_file.md#idea-plugin__extensionPoints__extensionPoint) for details_
 
-```xml
-<idea-plugin>
-  <id>my.plugin</id>
+</procedure>
 
-  <extensionPoints>
-    <extensionPoint
-            name="myExtensionPoint1"
-            beanClass="com.example.MyBeanClass"/>
+The plugin that contributes to the extension point will read the specified properties from the <path>plugin.xml</path> file.
 
-    <extensionPoint
-            name="myExtensionPoint2"
-            interface="com.example.MyInterface"/>
-  </extensionPoints>
-
-</idea-plugin>
-```
-
-The `name` attribute assigns a unique name for this extension point.
-Its fully qualified name required in [Using Extension Points](#using-extension-points) is built by prefixing the plugin [`<id>`](plugin_configuration_file.md#idea-plugin__id) as "namespace" followed by `.` separator: `my.plugin.myExtensionPoint1` and `my.plugin.myExtensionPoint2`.
-
-The `beanClass` attribute sets a bean class that specifies one or several properties annotated with the [`@Attribute`](%gh-ic%/platform/util/src/com/intellij/util/xmlb/annotations/Attribute.java) annotation.
-Note that bean classes do not follow the JavaBean standard.
-Implement [`PluginAware`](%gh-ic%/platform/extensions/src/com/intellij/openapi/extensions/PluginAware.java) to obtain information about the plugin providing the actual extension.
-
-The `interface` attribute sets an interface the plugin that contributes to the extension point must implement.
-
-The `area` attribute determines the scope in which the extension will be instantiated.
-As extensions should be stateless, it is **not** recommended to use non-default.
-Must be one of `IDEA_APPLICATION` for Application (default), `IDEA_PROJECT` for Project, or `IDEA_MODULE` for Module scope.
-
-The plugin that contributes to the extension point will read those properties from the <path>plugin.xml</path> file.
+If extension implementations are filtered according to [dumb mode](indexing_and_psi_stubs.md#dumb-mode), the base class should be
+marked with [`PossiblyDumbAware`](%gh-ic%/platform/core-api/src/com/intellij/openapi/project/PossiblyDumbAware.java) to highlight this.
+Use [`DumbService.getDumbAwareExtensions()`](%gh-ic%/platform/core-api/src/com/intellij/openapi/project/DumbService.kt) to retrieve dumb-aware implementations.
 
 Base classes for extensions requiring a key:
 
@@ -69,14 +49,35 @@ Base classes for extensions requiring a key:
 >
 {style="note"}
 
-### Sample
+## Example
 
-To clarify this, consider the following sample `MyBeanClass` bean class used in the above <path>plugin.xml</path> file:
+Consider example extension points declarations:
+
+<path>myPlugin/META-INF/plugin.xml</path>
+
+```xml
+<idea-plugin>
+  <id>my.plugin</id>
+
+  <extensionPoints>
+    <extensionPoint
+        name="myExtensionPoint1"
+        interface="com.example.MyInterface"/>
+
+    <extensionPoint
+        name="myExtensionPoint2"
+        beanClass="com.example.MyBeanClass"/>
+  </extensionPoints>
+
+</idea-plugin>
+```
+
+The `com.example.MyBeanClass` bean class used in the above `plugin.xml` file is implemented as follows:
 
 <path>myPlugin/src/com/myplugin/MyBeanClass.java</path>
 
 ```java
-public class MyBeanClass extends AbstractExtensionPointBean {
+public final class MyBeanClass extends AbstractExtensionPointBean {
 
   @Attribute("key")
   public String key;
@@ -96,9 +97,8 @@ public class MyBeanClass extends AbstractExtensionPointBean {
 ```
 
 > See [Extension properties code insight](plugin_extensions.md#extension-properties-code-insight) on how to provide smart completion/validation.
->
 
-For above extension points usage in _anotherPlugin_ would look like this (see also [Declaring Extensions](plugin_extensions.md#declaring-extensions)):
+For above extension points, their usage in _anotherPlugin_ would look like this (see also [Declaring Extensions](plugin_extensions.md#declaring-extensions)):
 
 <path>anotherPlugin/META-INF/plugin.xml</path>
 
@@ -113,7 +113,7 @@ For above extension points usage in _anotherPlugin_ would look like this (see al
   <extensions defaultExtensionNs="my.plugin">
     <myExtensionPoint1
             key="someKey"
-            implementationClass="another.some.implementation.class"/>
+            implementationClass="com.example.MyImplementation"/>
 
     <myExtensionPoint2
             implementation="another.MyInterfaceImpl"/>
@@ -124,17 +124,19 @@ For above extension points usage in _anotherPlugin_ would look like this (see al
 
 ## Using Extension Points
 
-To refer to all registered extension instances at runtime, declare an [`ExtensionPointName`](%gh-ic%/platform/extensions/src/com/intellij/openapi/extensions/ExtensionPointName.kt) passing in the fully-qualified name matching its [declaration in plugin.xml](#declaring-extension-points).
+To refer to all registered extension instances at runtime, declare an [`ExtensionPointName`](%gh-ic%/platform/extensions/src/com/intellij/openapi/extensions/ExtensionPointName.kt) with private visibility passing in the fully qualified name matching its [declaration in plugin.xml](#declaring-extension-points).
+If needed, provide a public method to query registered extensions (Sample: [`TestSourcesFilter.isTestSources()`](%gh-ic%/platform/projectModel-api/src/com/intellij/openapi/roots/TestSourcesFilter.java)).
 
 <path>myPlugin/src/com/myplugin/MyExtensionUsingService.java</path>
 
 ```java
-public class MyExtensionUsingService {
+@Service
+public final class MyExtensionUsingService {
 
   private static final ExtensionPointName<MyBeanClass> EP_NAME =
       ExtensionPointName.create("my.plugin.myExtensionPoint1");
 
-  public void useExtensions() {
+  public void useRegisteredExtensions() {
     for (MyBeanClass extension : EP_NAME.getExtensionList()) {
       String key = extension.getKey();
       String clazz = extension.getClass();
@@ -148,12 +150,25 @@ public class MyExtensionUsingService {
 A gutter icon for the `ExtensionPointName` declaration allows navigating to the corresponding [`<extensionPoint>`](plugin_configuration_file.md#idea-plugin__extensionPoints__extensionPoint) declaration in <path>plugin.xml</path>.
 Code insight is available for the extension point name String literal (2022.3).
 
-## Dynamic Extension Points
+### Error Handling
 
-To support [Dynamic Plugins](dynamic_plugins.md) (2020.1 and later), an extension point must adhere to specific usage rules:
+When processing extension implementations or registrations, there might be errors, compatibility and configuration issues.
+Use [`PluginException`](%gh-ic%/platform/core-api/src/com/intellij/diagnostic/PluginException.java) to log and correctly attribute the causing plugin for
+[builtin error reporting](ide_infrastructure.md#error-reporting).
+
+To report use of deprecated API, use `PluginException.reportDeprecatedUsage()` methods.
+
+**Examples:**
+- [`CompositeFoldingBuilder.assertSameFile()`](%gh-ic%/platform/core-api/src/com/intellij/lang/folding/CompositeFoldingBuilder.java)
+- [`InspectionProfileEntry.getDisplayName()`](%gh-ic%/platform/analysis-api/src/com/intellij/codeInspection/InspectionProfileEntry.java)
+
+## Dynamic Extension Points
+<primary-label ref="2020.1"/>
+
+To support [Dynamic Plugins](dynamic_plugins.md), an extension point must adhere to specific usage rules:
 
 - extensions are enumerated on every use and extensions instances are not stored anywhere
-- alternatively, an [`ExtensionPointListener`](%gh-ic%/platform/extensions/src/com/intellij/openapi/extensions/ExtensionPointListener.kt) can perform necessary updates of data structures (register via `ExtensionPointName.addExtensionPointListener()`)
+- alternatively, an [`ExtensionPointListener`](%gh-ic%/platform/extensions/src/com/intellij/openapi/extensions/ExtensionPointListener.kt) can perform any necessary updates of data structures (register via `ExtensionPointName.addExtensionPointListener()`)
 
 Extension points matching these conditions can then be marked as _dynamic_ by adding `dynamic="true"` in their declaration:
 
@@ -166,5 +181,4 @@ Extension points matching these conditions can then be marked as _dynamic_ by ad
 </extensionPoints>
 ```
 
-> All non-dynamic extension points are highlighted via <control>Plugin DevKit | Plugin descriptor | Plugin.xml dynamic plugin verification</control> inspection available in IntelliJ IDEA 2020.1 or later.
-> Previous versions also highlight the `dynamic` attribute as "experimental".
+All non-dynamic extension points are highlighted via <control>Plugin DevKit | Plugin descriptor | Plugin.xml dynamic plugin verification</control> inspection.

@@ -1,6 +1,6 @@
-# Tool Windows
+<!-- Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license. -->
 
-<!-- Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license. -->
+# Tool Windows
 
 <link-summary>Displaying additional information and controls in child windows of the IDE.</link-summary>
 
@@ -8,7 +8,7 @@
 
 **Product Help:** [Tool windows](https://www.jetbrains.com/help/idea/tool-windows.html)
 
-**Platform UI Guidelines:** [Tool window](https://jetbrains.design/intellij/components/tool_window/)
+**UI Guidelines:** [](tool_window.md)
 
 </tldr>
 
@@ -32,13 +32,13 @@ The extension point attributes specify all the data which is necessary to displa
 * The `id` attribute (required) of the tool window which corresponds to the text displayed on the tool window button.
 To provide a localized text, specify matching `toolwindow.stripe.[id]` message key (escape spaces with `_`) in the [resource bundle](plugin_configuration_file.md#idea-plugin__resource-bundle) (code insight supported in 2020.3 and later).
 
-* The `icon` to display on the tool window button (13x13 pixels, grey and monochromatic; see [Tool window](https://jetbrains.design/intellij/components/tool_window/#07) in IntelliJ Platform UI Guidelines and [Working with Icons and Images](work_with_icons_and_images.md))
+* The `icon` to display on the tool window button (13x13 pixels, grey and monochromatic; see [](tool_window.md) in UI Guidelines and [](icons.md))
 
 * The `anchor`, meaning the side of the screen on which the tool window is displayed ("left" (default), "right" or "bottom")
 
 * The `secondary` attribute, specifying whether the tool window is displayed in the primary or the secondary group
 
-* The `factoryClass` attribute (required), a class implementing [`ToolWindowFactory`](%gh-ic%/platform/platform-api/src/com/intellij/openapi/wm/ToolWindowFactory.java).
+* The `factoryClass` attribute (required), a class implementing [`ToolWindowFactory`](%gh-ic%/platform/platform-api/src/com/intellij/openapi/wm/ToolWindowFactory.kt).
 
 When the user clicks on the tool window button, the `createToolWindowContent()` method of the factory class is called, and initializes the UI of the tool window.
 This procedure ensures that unused tool windows don't cause any overhead in startup time or memory usage: if a user does not interact with the tool window, no plugin code will be loaded or executed.
@@ -51,13 +51,13 @@ If the tool window of a plugin should not be displayed for all projects:
 
 <tab title="2023.3 and later">
 
-Implement `ToolwindowFactory.isApplicableAsync(Project)`.
+Implement `ToolWindowFactory.isApplicableAsync(Project)`.
 
 </tab>
 
 <tab title="2021.1 and later">
 
-Implement `ToolwindowFactory.isApplicable(Project)`.
+Implement `ToolWindowFactory.isApplicable(Project)`.
 
 </tab>
 
@@ -74,21 +74,21 @@ To show and hide a tool window dynamically while the user is working with the pr
 
 ### Programmatic Setup
 
-For toolwindows shown only after invoking specific actions, use [`ToolWindowManager.registerToolWindow(String,RegisterToolWindowTaskBuilder)`](%gh-ic%/platform/platform-api/src/com/intellij/openapi/wm/ToolWindowManager.kt).
+For tool windows shown only after invoking specific actions, use [`ToolWindowManager.registerToolWindow(String,RegisterToolWindowTaskBuilder)`](%gh-ic%/platform/platform-api/src/com/intellij/openapi/wm/ToolWindowManager.kt).
 
-Always use [`ToolWindowManager.invokeLater()`](%gh-ic%/platform/platform-api/src/com/intellij/openapi/wm/ToolWindowManager.kt) instead of "plain" `Application.invokeLater()` when scheduling EDT tasks related to tool windows (see [](general_threading_rules.md)).
+Always use [`ToolWindowManager.invokeLater()`](%gh-ic%/platform/platform-api/src/com/intellij/openapi/wm/ToolWindowManager.kt) instead of "plain" `Application.invokeLater()` when scheduling EDT tasks related to tool windows (see [](threading_model.md)).
 
 ## Contents (Tabs)
 
 Displaying the contents of many tool windows requires access to [indexes](indexing_and_psi_stubs.md).
-Because of that, tool windows are normally disabled while building indexes unless the `ToolWindowFactory` implements [`DumbAware`](%gh-ic%/platform/core-api/src/com/intellij/openapi/project/DumbAware.java).
+Because of that, tool windows are normally disabled while building indexes unless the `ToolWindowFactory` is marked [dumb aware](indexing_and_psi_stubs.md#DumbAwareAPI).
 
 As mentioned previously, tool windows can contain multiple contents (tabs).
 To manage the contents of a tool window, call [`ToolWindow.getContentManager()`](%gh-ic%/platform/ide-core/src/com/intellij/openapi/wm/ToolWindow.java).
 To add a content (tab), first create it by calling [`ContentManager.getFactory().createContent()`](%gh-ic%/platform/ide-core/src/com/intellij/ui/content/ContentManager.java), and then to add it to the tool window using [`ContentManager.addContent()`](%gh-ic%/platform/ide-core/src/com/intellij/ui/content/ContentManager.java).
 Use `Content.setDisposer()` to register associated `Disposable` (see [](disposers.md)).
 
-See [`SimpleToolWindowPanel`](%gh-ic%/platform/platform-api/src/com/intellij/openapi/ui/SimpleToolWindowPanel.java) as a convenient base class, supporting [Toolbars](basic_action_system.md#building-ui-from-actions) and both vertical/horizontal layout.
+See [`SimpleToolWindowPanel`](%gh-ic%/platform/platform-api/src/com/intellij/openapi/ui/SimpleToolWindowPanel.java) as a convenient base class, supporting [Toolbars](basic_action_system.md#buildingToolbarPopupMenu) and both vertical/horizontal layout.
 
 ### Closing Tabs
 
@@ -114,7 +114,7 @@ Project-level topic [`ToolWindowManagerListener`](%gh-ic%/platform/platform-impl
 
 ## Sample Plugin
 
-To clarify how to develop plugins that create tool windows, consider the **toolWindow** sample plugin available in the [code samples](%gh-sdk-samples%/tool_window).
+To clarify how to develop plugins that create tool windows, consider the **toolWindow** sample plugin available in the [code samples](%gh-sdk-samples-master%/tool_window).
 
 See [](code_samples.md) on how to set up and run the plugin.
 

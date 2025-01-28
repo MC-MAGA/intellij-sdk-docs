@@ -1,11 +1,11 @@
+<!-- Copyright 2000-2024 JetBrains s.r.o. and other contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file. -->
+
 # Internal API Migration
 
-<!-- Copyright 2000-2023 JetBrains s.r.o. and other contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file. -->
+<link-summary>Lists private API annotated with @ApiStatus.Internal/@IntellijInternalApi and corresponding replacement.</link-summary>
 
-<link-summary>Lists private API annotated with ApiStatus.Internal/IntellijInternalApi and corresponding replacement.</link-summary>
-
-This page lists commonly used API annotated with [`org.jetbrains.annotations.ApiStatus.Internal`](https://github.com/JetBrains/java-annotations/blob/master/common/src/main/java/org/jetbrains/annotations/ApiStatus.java)
-or [`IntellijInternalApi`](%gh-ic%/platform/util/src/com/intellij/openapi/util/IntellijInternalApi.kt)
+This page lists commonly used API annotated with [`@ApiStatus.Internal`](%gh-java-annotations%/common/src/main/java/org/jetbrains/annotations/ApiStatus.java)
+or [`@IntellijInternalApi`](%gh-ic%/platform/util/src/com/intellij/openapi/util/IntellijInternalApi.kt)
 which indicates it is _private API_ and must not be used outside of IntelliJ Platform itself:
 
 > Indicates that the annotated element (class, method, field, etc.) **must not be considered as a public API**. It's made visible to allow
@@ -34,7 +34,7 @@ Each entry is mapped to its corresponding _Replacement_, pointing to the recomme
 
 | Internal API                             | Replacement                                                                                                                                                                 |
 |------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `AnAction.applyTextOverride()`           | [](basic_action_system.md#setting-the-override-text-element)                                                                                                                |
+| `AnAction.applyTextOverride()`           | [](plugin_configuration_file.md#idea-plugin__actions__action__override-text)                                                                                       |
 | `ApplicationLoadListener`                | See [](plugin_components.md#application-startup)                                                                                                                            |
 | `BuildNumber.currentVersion()`           | Use `ApplicationInfo.getBuild()`                                                                                                                                            |
 | `CompactVirtualFileSet`                  | Use `VfsUtilCore.createCompactVirtualFileSet()`                                                                                                                             |
@@ -79,6 +79,7 @@ Therefore, any reported violations can be disregarded.
 | [`AnimatedIcon.ANIMATION_IN_RENDERER_ALLOWED`](%gh-ic%/platform/ide-core/src/com/intellij/ui/AnimatedIcon.java)                                      | Made public in 2021.3                           |
 | [`BaseExpirableExecutor.expireWith()`](%gh-ic%/platform/core-api/src/com/intellij/openapi/application/BaseExpirableExecutor.java)                    | Made public in 2023.2                           |
 | [`BundleBase`](%gh-ic%/platform/util/src/com/intellij/BundleBase.kt)                                                                                 | Made public in 2022.1                           |
+| [`CodeVisionPlaceholderCollector`](%gh-ic%/platform/lang-impl/src/com/intellij/codeInsight/codeVision/CodeVisionPlaceholderCollector.kt)             | Made public in 2024.2                           |
 | [`IdFilter`](%gh-ic%/platform/indexing-api/src/com/intellij/util/indexing/IdFilter.java)                                                             | Made public in 2021.2/3                         |
 | [`HashingStrategy`](%gh-ic%/platform/util/base/src/com/intellij/util/containers/HashingStrategy.java)                                                | Made public in 2023.1                           |
 | [`JsonCustomStructureViewFactory`](%gh-ic%/json/src/com/intellij/json/structureView/JsonCustomStructureViewFactory.java)                             | Made public in 2023.2                           |

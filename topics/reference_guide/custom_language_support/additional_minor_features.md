@@ -1,26 +1,27 @@
-<!-- Copyright 2000-2023 JetBrains s.r.o. and other contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file. -->
+<!-- Copyright 2000-2024 JetBrains s.r.o. and other contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file. -->
 
 # Additional Minor Features
 
 <link-summary>Additional minor features for custom languages.</link-summary>
 
-A number of minor features are listed in the following format:
+A number of commonly used minor features are listed in the following format:
 
-_EP: `fully.qualified.extensionPointName`_ - Extension Point Name (must be specified in <path>[plugin.xml](plugin_configuration_file.md)</path>)
+_EP: `fully.qualified.extensionPointName`_ — Extension Point Name (must be specified in <path>[plugin.xml](plugin_configuration_file.md)</path>)
 
-_`com.extensionPoint.class`_ _description text_ - Extension Point class/interface to provide functionality
+_`com.extensionPoint.class`_ _description text_ — Extension Point class/interface to provide functionality
 
 _- Sample 1_ - Sample implementation
 
-> See also [](extension_point_list.md#langextensionpointsxml) to discover more Language-related Extension Points. See also [](explore_api.md).
+> See also [](intellij_platform_extension_point_list.md#langextensionpointsxml) to discover more Language-related Extension Points as well as general guide [](explore_api.md).
 >
+{title="Locating more Language EPs"}
 
 ### Brace Matching
 
 EP: `com.intellij.lang.braceMatcher`
 
 [`PairedBraceMatcher`](%gh-ic%/platform/analysis-api/src/com/intellij/lang/PairedBraceMatcher.java)
-Returns an array of brace pairs ([`BracePair`](%gh-ic%/platform/analysis-api/src/com/intellij/lang/BracePair.java)) specifying the characters for the opening and closing braces and the lexer token types for these characters.
+returns an array of brace pairs ([`BracePair`](%gh-ic%/platform/analysis-api/src/com/intellij/lang/BracePair.java)) specifying the characters for the opening and closing braces and the lexer token types for these characters.
 (In principle, it is possible to return multi-character tokens, like "begin" and "end", as the start and end tokens of a brace pair.
 The IDE will match such braces, but the highlighting for such braces will not be entirely correct.)
 
@@ -29,13 +30,18 @@ Structural braces have higher priority than regular braces: they are matched wit
 An opening non-structural brace is not matched with a closing one if one of them is inside a pair of matched structural braces and another is outside.
 See also [](#recognizing-complex-multi-block-expressions).
 
-*2022.3* If the brace matching is "too heavy" and should not be executed in EDT, implement [`HeavyBraceHighlighter`](%gh-ic%/platform/lang-impl/src/com/intellij/codeInsight/highlighting/HeavyBraceHighlighter.java) and register in `com.intellij.heavyBracesHighlighter` EP.
+#### "Heavy" Brace Matching
+<primary-label ref="2022.3"/>
+
+If the brace matching is "too heavy" and should not be executed in [EDT](threading_model.md), implement
+[`HeavyBraceHighlighter`](%gh-ic%/platform/lang-impl/src/com/intellij/codeInsight/highlighting/HeavyBraceHighlighter.java)
+and register in `com.intellij.heavyBracesHighlighter` extension point.
 
 ### Quote Handling
 
 EP: `com.intellij.lang.quoteHandler`
 
-To support _Insert pair quote_ feature, provide [`QuoteHandler`](%gh-ic%/platform/lang-impl/src/com/intellij/codeInsight/editorActions/QuoteHandler.java).
+To support <control>Insert pair quote</control> feature, provide [`QuoteHandler`](%gh-ic%/platform/lang-impl/src/com/intellij/codeInsight/editorActions/QuoteHandler.java).
 In most cases, [`SimpleTokenSetQuoteHandler`](%gh-ic%/platform/lang-impl/src/com/intellij/codeInsight/editorActions/SimpleTokenSetQuoteHandler.java) base implementation will be suitable.
 
 ### Comment Code
@@ -86,10 +92,11 @@ EP: `com.intellij.nameSuggestionProvider`
 EP: `com.intellij.highlightUsagesHandlerFactory`
 
 [`HighlightUsagesHandlerFactory`](%gh-ic%/platform/lang-impl/src/com/intellij/codeInsight/highlighting/HighlightUsagesHandlerFactory.java) allows highlighting e.g., Exit Points or Exceptions.
+Can be [](indexing_and_psi_stubs.md#DumbAwareAPI) (2024.3+).
 
 ### TODO View
 
-[`ParserDefinition.getCommentTokens()`](%gh-ic%/platform/core-api/src/com/intellij/lang/ParserDefinition.java) must return the set of tokens treated as comments to populate the *TODO* tool window.
+[`ParserDefinition.getCommentTokens()`](%gh-ic%/platform/core-api/src/com/intellij/lang/ParserDefinition.java) must return the set of tokens treated as comments to populate the <control>TODO</control> tool window.
 
 #### Additional places
 
@@ -140,10 +147,10 @@ See also [](#brace-matching).
 EP: `com.intellij.breadcrumbsInfoProvider`
 
 [`BreadcrumbsProvider`](%gh-ic%/platform/editor-ui-api/src/com/intellij/ui/breadcrumbs/BreadcrumbsProvider.java)
-allows for language-specific breadcrumbs.
-Please refer to
-[`GroovyBreadcrumbsInfoProvider`](%gh-ic%/plugins/groovy/src/org/jetbrains/plugins/groovy/editor/GroovyBreadcrumbsInfoProvider.kt)
-as implementation example.
+allows for language-specific [breadcrumbs](https://www.jetbrains.com/help/idea/navigating-through-the-source-code.html#editor_breadcrumbs).
+[Sticky Lines](https://www.jetbrains.com/help/idea/sticky-lines.html) feature also uses this data.
+
+- [`GroovyBreadcrumbsInfoProvider`](%gh-ic%/plugins/groovy/src/org/jetbrains/plugins/groovy/editor/GroovyBreadcrumbsInfoProvider.kt)
 
 ### Plain Text Completion
 
@@ -165,9 +172,9 @@ The UI will show implementations of this EP as an
 at appropriate locations.
 Developers can use the abstract classes in
 [`DefaultListSplitJoinContext`](%gh-ic%/platform/lang-impl/src/com/intellij/openapi/editor/actions/lists/DefaultListSplitJoinContext.kt)
-for their implementation and
-[`XmlAttributesSplitJoinContext`](%gh-ic%/xml/impl/src/com/intellij/codeInsight/intentions/XmlAttributesSplitJoinContext.kt)
-serves as a good example.
+for their implementation.
+
+- [`XmlAttributesSplitJoinContext`](%gh-ic%/xml/impl/src/com/intellij/codeInsight/intentions/XmlAttributesSplitJoinContext.kt)
 
 ### Suggesting Rename and Change Signature Refactorings
 
@@ -175,9 +182,8 @@ EP: `com.intellij.suggestedRefactoringSupport`
 
 [`SuggestedRefactoringSupport`](%gh-ic%/platform/lang-api/src/com/intellij/refactoring/suggested/SuggestedRefactoringSupport.kt)
 provides functionality for suggesting rename and change signature refactorings for custom languages.
-Please see
-[`KotlinSuggestedRefactoringSupport`](%gh-ic%/plugins/kotlin/idea/src/org/jetbrains/kotlin/idea/refactoring/suggested/KotlinSuggestedRefactoringSupport.kt)
-for an implementation example.
+
+- [`KotlinSuggestedRefactoringSupport`](%gh-ic%/plugins/kotlin/idea/src/org/jetbrains/kotlin/idea/refactoring/suggested/KotlinSuggestedRefactoringSupport.kt)
 
 ### Reader Mode
 
@@ -195,13 +201,16 @@ EP: `com.intellij.editorTabColorProvider`
 
 [`EditorTabColorProvider`](%gh-ic%/platform/ide-core-impl/src/com/intellij/openapi/fileEditor/impl/EditorTabColorProvider.java)
 allows for the modification of the background colors for specific files.
+If access to indexes is not required, it can be marked [dumb aware](indexing_and_psi_stubs.md#DumbAwareAPI).
 
 ### Custom Names and Tooltips for Editor Tabs
 
 EP: `com.intellij.editorTabTitleProvider`
 
-[`EditorTabTitleProvider`](%gh-ic%/platform/ide-core-impl/src/com/intellij/openapi/fileEditor/impl/EditorTabTitleProvider.java)
+[`EditorTabTitleProvider`](%gh-ic%/platform/ide-core-impl/src/com/intellij/openapi/fileEditor/impl/EditorTabTitleProvider.kt)
 allows for specifying custom names and tooltips displayed in the title of editor tabs.
+If access to indexes is not required, it can be marked [dumb aware](indexing_and_psi_stubs.md#DumbAwareAPI).
+
 Please see, e.g.,
 [`GradleEditorTabTitleProvider`](%gh-ic%/plugins/gradle/src/org/jetbrains/plugins/gradle/util/GradleEditorTabTitleProvider.kt)
 which shows how the project name is added to the editor tab for Gradle files.
@@ -218,9 +227,8 @@ the current project scope.
 Note that these filters should be permissive and only prevent highlighting for files that are absolutely
 known to be outside the scope.
 
-Examples:
-[`JavaProblemHighlightFilter`](%gh-ic%/java/java-impl/src/com/intellij/codeInsight/daemon/JavaProblemHighlightFilter.java),
-[`PyProblemFileHighlightFilter`](%gh-ic%/python/src/com/jetbrains/python/codeInsight/PyProblemFileHighlightFilter.java)
+- [`JavaProblemHighlightFilter`](%gh-ic%/java/java-impl/src/com/intellij/codeInsight/daemon/JavaProblemHighlightFilter.java)
+- [`PyProblemFileHighlightFilter`](%gh-ic%/python/src/com/jetbrains/python/codeInsight/PyProblemFileHighlightFilter.java)
 
 ### Provide Fully Qualified Names (FQN) for Elements
 
@@ -231,8 +239,7 @@ provides features like copying and pasting references of FQN for, e.g., classes,
 Therefore, the `QualifiedNameProvider` implementation needs to provide logic to convert from and to
 FQN.
 
-Example:
-[`PyQualifiedNameProvider`](%gh-ic%/python/src/com/jetbrains/python/actions/PyQualifiedNameProvider.java)
+- [`PyQualifiedNameProvider`](%gh-ic%/python/src/com/jetbrains/python/actions/PyQualifiedNameProvider.java)
 
 ### Label Files as Test Files
 
@@ -254,9 +261,7 @@ allows for customizing the behavior of moving statements up and down.
 This can be used to keep code syntactically correct when moving code in the editor, e.g. when moving
 a variable declaration.
 
-Example:
-[`DeclarationMover`](%gh-ic%/java/java-impl/src/com/intellij/codeInsight/editorActions/moveUpDown/DeclarationMover.java)
-
+- [`DeclarationMover`](%gh-ic%/java/java-impl/src/com/intellij/codeInsight/editorActions/moveUpDown/DeclarationMover.java)
 
 
 <include from="snippets.md" element-id="missingContent"/>
