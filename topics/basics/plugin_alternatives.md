@@ -1,6 +1,6 @@
-# Alternatives to Implementing a Plugin
+<!-- Copyright 2000-2024 JetBrains s.r.o. and other contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file. -->
 
-<!-- Copyright 2000-2023 JetBrains s.r.o. and other contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file. -->
+# Alternatives to Implementing a Plugin
 
 <link-summary>Alternative strategies and tools to avoid building a "full" plugin.</link-summary>
 
@@ -35,6 +35,7 @@ Scripts can access the IntelliJ Platform APIs and can be implemented in Kotlin, 
 Created scripts are stored in the [IDE configuration directory](https://www.jetbrains.com/help/idea/directories-used-by-the-ide-to-store-settings-caches-plugins-and-logs.html#config-directory) and can't be shared as part of project files or configuration.
 
 ## Flora Plugin
+<secondary-label ref="incubating"/>
 
 The [Flora](https://plugins.jetbrains.com/plugin/17669-flora-beta-) plugin allows for developing project-specific extensions as Kotlin Script (<path>\*.kts</path>) or JavaScript (<path>\*.js</path>) files.
 Flora extensions have access to all available IntelliJ Platform APIs, just like a regular plugin.
@@ -42,6 +43,8 @@ Flora extensions have access to all available IntelliJ Platform APIs, just like 
 Every extension is represented by a single file and stored directly in a project's <path>.plugins</path> directory.
 Extensions can be easily shared with other team members by adding the <path>.plugins</path> directory to VCS.
 Also, adding the Flora plugin in the <ui-path>Settings | Build, Execution, Deployment | Required Plugins</ui-path> and sharing this configuration as part of a project makes it effortless to deliver additional IDE functionalities to your team without any manual setup.
+
+> Please note that the Flora plugin is in an experimental state.
 
 ## LivePlugin
 

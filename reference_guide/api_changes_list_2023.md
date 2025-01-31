@@ -1,4 +1,4 @@
-<!-- Copyright 2000-2023 JetBrains s.r.o. and other contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file. -->
+<!-- Copyright 2000-2024 JetBrains s.r.o. and other contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file. -->
 
 # Incompatible Changes in IntelliJ Platform and Plugins API 2023.*
 
@@ -7,9 +7,11 @@ Before documenting a breaking API change, please make sure that the change canno
 
 APIs marked with @Deprecated(forRemoval=true), @ApiStatus.Experimental, @ApiStatus.Internal/IntellijInternalApi, or @ApiStatus.ScheduledForRemoval don't need to be documented.
 
-To document a new incompatible change, add a new line with the problem pattern followed by a 2nd line with ": "-prefixed human-readable description and recommended fix/action.
+To document a new incompatible change, add a new line with the problem pattern followed by a 2nd line with ": "-prefixed human-readable description
+and recommended fix/action (REQUIRED, please write full sentence ending with '.', see existing entries as reference).
+Non-platform changes must be grouped under relevant section for plugin.
 
-The following problem patterns are supported and must be followed EXACTLY:
+The following problem patterns are supported and must be followed EXACTLY (e.g., no '#' instead of '.'):
 
 <package name> package removed
 
@@ -52,8 +54,7 @@ Where the placeholders must be enclosed in code quotes (`name`):
 <property name> is a full name of a property from .properties file, like `some.action.description`
 <bundle name> is a fully qualified name of the property bundle, which includes its package, like `message.IdeBundle`
 
-NOTE: If a code change you're trying to document doesn't match any of the above patterns, fill in a ticket in the YouTrack.
-An example of a ticket is https://youtrack.jetbrains.com/issue/MP-1218. Until supported, you may document the change as you prefer, and I will correct it later.
+NOTE: If a code change you're trying to document doesn't match any of the above patterns, please ask in #plugins-verifier
 
 NOTE: You are allowed to prettify the pattern using links: [`org.example.Foo`](https://github.com/JetBrains/intellij-community/tree/master/)
 
@@ -66,14 +67,14 @@ NOTE: Entries not starting with code quotes (`name`) can be added to document no
 
 <include from="snippets.md" element-id="apiChangesJavaVersion"/>
 
-<include from="tools_gradle_intellij_plugin.md" element-id="gradle_plugin_223_problem"/>
+<include from="snippets.md" element-id="gradlePluginVersion"/>
 
 ## 2023.3
 
 ### IntelliJ Platform 2023.3
 
 Threading Model changes
-: Please see updated [](general_threading_rules.md).
+: Please see updated [](threading_model.md).
 
 Removal of commons-lang2 and commons-collections libraries
 : _commons-lang2_ library is going to be removed, a temporary compatibility layer (marked with `@Deprecated(forRemoval = true)` to highlight usages) is bundled.
@@ -90,7 +91,7 @@ JsonPath library unbundled
 : This may break source-compatibility with inheritors written in Kotlin if they declare it as nullable.
 
 `com.intellij.openapi.actionSystem.ex.ActionUtil.showDumbModeWarning(Project, AnActionEvent[])` method removed
-: Use `showDumbModeWarning(@Nullable Project project, @NotNull AnAction action, AnActionEvent @NotNull ... events)` instead.
+: Use `showDumbModeWarning(Project project, AnAction action, AnActionEvent @NotNull ... events)` instead.
 
 `com.intellij.profiler.eventtrace` package removed
 : Update code usages.
@@ -149,10 +150,31 @@ JsonPath library unbundled
 : Coroutine scope was added to track editor lifetime.
 
 `com.intellij.collaboration.ui.codereview.details.model.CodeReviewChangesViewModelBase` class removed
-: Incorrect EDT-reliant implementation removed.
+: Incorrect [EDT](threading_model.md)-reliant implementation removed.
 
 `com.intellij.collaboration.async.CoroutineUtilKt.DisposingScope(Disposable, CoroutineContext)` method removed
 : Use `com.intellij.collaboration.async.CoroutineUtilKt.disposingScope(CoroutineContext)` instead.
+
+`com.intellij.collaboration.ui.codereview.details.model.CodeReviewChangesViewModel.getReviewCommits()` method return type changed from `Flow` to `SharedFlow`
+: Concrete type usage forced to ensure correct behavior
+
+`com.intellij.collaboration.ui.codereview.details.model.CodeReviewChangesViewModel.getSelectedCommit()` method return type changed from `Flow` to `SharedFlow`
+: Concrete type usage forced to ensure correct behavior
+
+`com.intellij.collaboration.ui.codereview.details.model.CodeReviewChangesViewModel.getSelectedCommitIndex()` method return type changed from `Flow` to `SharedFlow`
+: Concrete type usage forced to ensure correct behavior
+
+`com.intellij.collaboration.auth.ui.login.LoginTokenGenerator.generateToken(String)` method return type changed from `String` to `void`
+: Removed unused return value
+
+`com.intellij.collaboration.auth.ui.login.TokenLoginDialog(Project, Component, LoginModel, String, DialogPanelSupplier)` constructor parameter type changed from `() -> DialogPanel`  to `CoroutineScope.() -> DialogPanel`
+: Allow using dialog scope in dialog panel
+
+`com.intellij.collaboration.ui.codereview.list.search.ChooserPopupUtil.showAsyncChooserPopup(RelativePoint, Flow<List<T>>, Mapper, ListCellRenderer, PopupConfig)` method parameter type changed from `Flow<List<T>>` to `Flow<Result<List<T>>>`
+: Handle list loading errors inside the popup
+
+`com.intellij.collaboration.ui.codereview.list.search.ChooserPopupUtil.showAsyncChooserPopup(RelativePoint, Flow<List<T>>, Presenter, PopupConfig)` method parameter type changed from `Flow<List<T>>` to `Flow<Result<List<T>>>`
+: Handle list loading errors inside the popup
 
 ### Java Plugin 2023.3
 
@@ -160,6 +182,9 @@ JsonPath library unbundled
 : As a part of migration to new experimental [`ModCommand`](%gh-ic%/platform/analysis-api/src/com/intellij/modcommand/ModCommand.java) API, the class was removed completely. It's a part of implementation module and was never intended to be inherited by external plugins. Consider implementing [`LocalInspectionTool`](%gh-ic%/platform/analysis-api/src/com/intellij/codeInspection/LocalInspectionTool.java) directly.
 
 `com.intellij.codeInsight.TailTypes` class renamed to `com.intellij.codeInsight.JavaTailTypes`
+: Update code usages.
+
+`com.intellij.unscramble.ThreadDumpParser` class moved to package `com.intellij.threadDumpParser`
 : Update code usages.
 
 ### JavaScript Plugin 2023.3
@@ -276,6 +301,11 @@ Fragment builder functions from `ExternalSystemRunConfigurationUtil` file moved 
 
 `com.intellij.database.datagrid.DataGrid.getPureBinaryDisplayType(ModelIndex<GridColumn>)` method removed
 : Use `com.intellij.database.datagrid.DataGrid.getPureDisplayType(ModelIndex<GridColumn>)` instead.
+
+### Package Checker Plugin 2023.3
+
+`com.intellij.packageChecker.maven.MavenSharedDependenciesModel` class renamed to `com.intellij.packageChecker.java.BuildSystemDependenciesModelBase`
+: Renamed to a more correct and generic name.
 
 ## 2023.2
 

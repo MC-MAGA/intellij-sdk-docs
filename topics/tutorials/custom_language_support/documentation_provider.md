@@ -1,4 +1,4 @@
-<!-- Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license. -->
+<!-- Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license. -->
 
 # 20. Documentation
 
@@ -8,8 +8,8 @@
 
 **Reference**: [](documentation.md)
 
-**Code**: [`SimpleDocumentationProvider`](%gh-sdk-samples%/simple_language_plugin/src/main/java/org/intellij/sdk/language/SimpleDocumentationProvider.java),
-[`SimpleUtil`](%gh-sdk-samples%/simple_language_plugin/src/main/java/org/intellij/sdk/language/SimpleUtil.java)
+**Code**: [`SimpleDocumentationProvider`](%gh-sdk-samples-master%/simple_language_plugin/src/main/java/org/intellij/sdk/language/SimpleDocumentationProvider.java),
+[`SimpleUtil`](%gh-sdk-samples-master%/simple_language_plugin/src/main/java/org/intellij/sdk/language/SimpleUtil.java)
 
 **Testing**: [](documentation_test.md)
 
@@ -17,8 +17,8 @@
 
 <include from="language_and_filetype.md" element-id="custom_language_tutorial_header"></include>
 
-> For plugins targeting IntelliJ Platform version 2023.1 or later, it is recommended to utilize the
-> Documentation Target API, as detailed in [](documentation.md#documentation-target-api).
+> For plugins targeting IntelliJ Platform version 2023.1 or later, it is recommended to use the
+> [](documentation.md#documentation-target-api).
 >
 {style="note"}
 
@@ -27,7 +27,7 @@ helps users by showing documentation for symbols like method calls inside the ed
 For the custom language tutorial, we're implementing a version of this extension point (EP) for the Simple Language that shows the key/value,
 the file where it is defined, and any related documentation comment.
 
-## Implement DocumentationProvider and Register the EP
+## Implement a Documentation Provider and Register the EP
 
 In the first step, we create an empty class that extends
 [`AbstractDocumentationProvider`](%gh-ic%/platform/analysis-api/src/com/intellij/lang/documentation/AbstractDocumentationProvider.java)
@@ -37,7 +37,7 @@ and register it in the <path>[plugin.xml](plugin_configuration_file.md)</path>.
 final class SimpleDocumentationProvider extends AbstractDocumentationProvider { }
 ```
 
-Make sure the class is registered in the <path>plugin.xml</path> between the `extensions` tags, as shown below:
+Make sure the extension is registered in the <path>plugin.xml</path> as shown below:
 
 ```xml
 <extensions defaultExtensionNs="com.intellij">
@@ -69,8 +69,7 @@ public @Nullable String generateDoc(PsiElement element,
 
 Now, we set a breakpoint in our dummy implementation, debug the plugin, and call <ui-path>View | Quick Documentation</ui-path>
 for the Simple property both in the Java file and the Simple file.
-We do this by placing the cursor over the key and invoking <ui-path>View | Quick Documentation</ui-path>
-for showing the documentation.
+We do this by placing the cursor over the key and invoking <ui-path>View | Quick Documentation</ui-path> to show the documentation.
 
 In both cases, we find that the element provided is `SimplePropertyImpl`, which is exactly what we hoped for.
 However, there are two drawbacks: inside a Java string, your cursor needs to be directly over `key` in the string `"simple:key"` to make <emphasis>Quick Documentation</emphasis> work.
@@ -78,17 +77,18 @@ Since the Simple Language only allows for one property per string,
 it would be nice if <emphasis>Quick Documentation</emphasis> worked no matter where your cursor was positioned in the string as long as the string contained a Simple property.
 Inside a Simple file, the situation is similar, and calling <ui-path>View | Quick Documentation</ui-path> only works when the cursor is positioned on the key.
 
-Please refer to the Addendum below, which explains how to improve on this situation by additionally overriding `getCustomDocumentationElement()` method.
+Refer to the [Addendum](#addendum) below, which explains how to improve on this situation by additionally overriding `getCustomDocumentationElement()` method.
 
 ## Extract Documentation Comments from Key/Value Definitions
 
 While `SimpleProperty` elements will provide us with their key and value, we have no direct access to a possible comment that is preceding the key/value definition.
 Since we would like to show this comment in the documentation as well, we need a small helper function that extracts the text from the comment.
-This function will reside in the `SimpleUtil` class and will find for instance the comment preceding `apikey` in the following short example:
+This function will reside in the `SimpleUtil` class and will find, for instance, the comment preceding `apikey` in the following short example:
 
-```text
-#An application programming interface key (API key) is a unique identifier
-#used to authenticate a user, developer, or calling program to an API.
+```properties
+# An application programming interface key (API key) is a unique
+# identifier used to authenticate a user, developer, or calling
+# program to an API.
 apikey=ph342m91337h4xX0r5k!11Zz!
 ```
 
@@ -134,7 +134,7 @@ After implementing all the steps above, the IDE will show the rendered documenta
 
 We can provide implementations for additional functionality that comes with a `DocumentationProvider`.
 For instance, when simply hovering the mouse over the code, it also shows documentation after a short delay.
-It's not necessary that this popup show the exact same information as when calling _Quick Documentation_, but for the purpose of this tutorial, we'll do just that.
+It's not necessary that this popup shows the exact same information as when calling _Quick Documentation_, but for the purpose of this tutorial, we'll do just that.
 
 ```java
 ```
@@ -156,6 +156,7 @@ In the case of Simple Language, the lookup element is already a `SimpleProperty`
 In other circumstances, you can override `getDocumentationElementForLookupItem() `and return the correct PSI element.
 
 ## Addendum: Choosing a Better Target Element
+{id="addendum"}
 
 To be able to call <ui-path>View | Quick Documentation</ui-path> for Simple properties in all places of a Java string literal, two steps are required:
 
